@@ -56,9 +56,7 @@ class SnsEventSource(TestCase):
         self.assertEqual(subscription.FilterPolicy, filterPolicy)
 
     def test_to_cloudformation_passes_the_redrive_policy(self):
-        redrivePolicy = {
-            "deadLetterTargetArn": "arn:aws:sqs:us-east-2:123456789012:MyDeadLetterQueue"
-        }
+        redrivePolicy = {"deadLetterTargetArn": "arn:aws:sqs:us-east-2:123456789012:MyDeadLetterQueue"}
         self.sns_event_source.RedrivePolicy = redrivePolicy
 
         resources = self.sns_event_source.to_cloudformation(function=self.function)

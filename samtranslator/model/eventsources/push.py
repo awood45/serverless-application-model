@@ -407,7 +407,13 @@ class SNS(PushEventSource):
 
             queue_policy = self._inject_sqs_queue_policy(self.Topic, queue_arn, queue_url)
             subscription = self._inject_subscription(
-                "sqs", queue_arn, self.Topic, self.Region, self.FilterPolicy, self.RedrivePolicy, function.resource_attributes
+                "sqs",
+                queue_arn,
+                self.Topic,
+                self.Region,
+                self.FilterPolicy,
+                self.RedrivePolicy,
+                function.resource_attributes,
             )
             event_source = self._inject_sqs_event_source_mapping(function, role, queue_arn)
 
@@ -430,7 +436,13 @@ class SNS(PushEventSource):
 
         queue_policy = self._inject_sqs_queue_policy(self.Topic, queue_arn, queue_url, queue_policy_logical_id)
         subscription = self._inject_subscription(
-            "sqs", queue_arn, self.Topic, self.Region, self.FilterPolicy, self.RedrivePolicy, function.resource_attributes
+            "sqs",
+            queue_arn,
+            self.Topic,
+            self.Region,
+            self.FilterPolicy,
+            self.RedrivePolicy,
+            function.resource_attributes,
         )
         event_source = self._inject_sqs_event_source_mapping(function, role, queue_arn, batch_size, enabled)
 

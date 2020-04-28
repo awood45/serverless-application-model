@@ -369,6 +369,7 @@ class SNS(PushEventSource):
         "Region": PropertyType(False, is_str()),
         "FilterPolicy": PropertyType(False, dict_of(is_str(), list_of(one_of(is_str(), is_type(dict))))),
         "SqsSubscription": PropertyType(False, one_of(is_type(bool), is_type(dict))),
+        "RedrivePolicy": PropertyType(False, dict_of(is_str(), list_of(one_of(is_str(), is_type(dict))))),
     }
 
     def to_cloudformation(self, **kwargs):
@@ -392,6 +393,7 @@ class SNS(PushEventSource):
                 self.Topic,
                 self.Region,
                 self.FilterPolicy,
+                self.RedrivePolicy,
                 function.resource_attributes,
             )
             return [self._construct_permission(function, source_arn=self.Topic), subscription]
@@ -405,7 +407,7 @@ class SNS(PushEventSource):
 
             queue_policy = self._inject_sqs_queue_policy(self.Topic, queue_arn, queue_url)
             subscription = self._inject_subscription(
-                "sqs", queue_arn, self.Topic, self.Region, self.FilterPolicy, function.resource_attributes
+                "sqs", queue_arn, self.Topic, self.Region, self.FilterPolicy, self.RedrivePolicy, function.resource_attributes
             )
             event_source = self._inject_sqs_event_source_mapping(function, role, queue_arn)
 
@@ -428,7 +430,7 @@ class SNS(PushEventSource):
 
         queue_policy = self._inject_sqs_queue_policy(self.Topic, queue_arn, queue_url, queue_policy_logical_id)
         subscription = self._inject_subscription(
-            "sqs", queue_arn, self.Topic, self.Region, self.FilterPolicy, function.resource_attributes
+            "sqs", queue_arn, self.Topic, self.Region, self.FilterPolicy, self.RedrivePolicy, function.resource_attributes
         )
         event_source = self._inject_sqs_event_source_mapping(function, role, queue_arn, batch_size, enabled)
 
@@ -437,7 +439,7 @@ class SNS(PushEventSource):
         resources.append(subscription)
         return resources
 
-    def _inject_subscription(self, protocol, endpoint, topic, region, filterPolicy, resource_attributes):
+    def _inject_subscription(self, protocol, endpoint, topic, region, filterPolicy, redrivePolicy, resource_attributes):
         subscription = SNSSubscription(self.logical_id)
         subscription.Protocol = protocol
         subscription.Endpoint = endpoint
@@ -449,6 +451,9 @@ class SNS(PushEventSource):
 
         if filterPolicy is not None:
             subscription.FilterPolicy = filterPolicy
+
+        if redrivePolicy is not None:
+            subscription.RedrivePolicy = redrivePolicy
 
         return subscription
 
